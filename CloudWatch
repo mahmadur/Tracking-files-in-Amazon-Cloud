@@ -251,4 +251,266 @@ Amazon CloudWatch returns a response similar to the following (the data has been
 2009-05-15 	22:54:00   	0.38   Percent
 Note
 Amazon CloudWatch returns the data for this function in the following order: date, time, sample, CPUUtilization, and unit
+ 
+ 3.Using of CloudWatch through Query API
+ 
+ Query API
 
+Query requests are HTTP or HTTPS requests that use the HTTP verb GET or POST and a Query parameter named Action or Operation. Action is used throughout this documentation, although Operation is supported for backward compatibility with other AWS Query APIs.
+
+Amazon CloudWatch Endpoints
+
+For information about this product's regions and endpoints, see Regions and Endpoints in the Amazon Web Services General Reference.
+
+Query Parameters
+
+Each Query request must include some common parameters to handle authentication and selection of an action. For more information, see Common Query Parameters in the Amazon CloudWatch API Reference.
+
+Note
+Some API operations take lists of parameters. These lists are specified using the following notation: param.member.n. Values of n are integers starting from 1. All lists of parameters must follow this notation, including lists that contain only one parameter. For example, a Query parameter list looks like this:
+&attribute.member.1=this
+&attribute.member.2=that
+The RequestId
+
+In every response from Amazon Web Services (AWS), you will find ResponseMetadata, which contains a string element called RequestId. This is simply a unique identifier that AWS assigns to provide tracking information. Although RequestId is included as part of every response, it will not be listed on the individual API documentation pages to improve readability of the API documentation and to reduce redundancy.
+
+Query API Authentication
+
+You can send Query requests over either HTTP or HTTPS. Regardless of which protocol you use, you must include a signature in every Query request. This section describes how to create the signature. The method described in the following procedure is known as signature version 2.
+
+To create the signature
+
+Create the canonicalized query string that you will need later in this procedure:
+
+Sort the UTF-8 query string components by parameter name with natural byte ordering.
+
+The parameters can come from the GET URI or from the POST body (when Content-Type is application/x-www-form-urlencoded).
+
+URL-encode the parameter name and values according to the following rules:
+
+Do not URL-encode any of the unreserved characters that RFC 3986 defines.
+
+These unreserved characters are A-Z, a-z, 0-9, hyphen ( - ), underscore ( _ ), period ( . ), and tilde ( ~ ).
+
+Percent-encode all other characters with %XY, where X and Y are hex characters 0-9 and uppercase A-F.
+
+Percent-encode extended UTF-8 characters in the form %XY%ZA and so on.
+
+Percent-encode the space character as %20 (and not +, as common encoding schemes do).
+
+Note
+Currently, all AWS service parameter names use unreserved characters, so you don't need to encode them. However, you might want to include code to handle parameter names that use reserved characters, for possible future use.
+Separate the encoded parameter names from their encoded values with the equals sign ( = ) (ASCII code 61), even if the parameter value is empty.
+
+Separate the name-value pairs with an ampersand ( & ) (ASCII code 38).
+
+Create the string to sign according to the following pseudo-grammar (the "\n" represents an ASCII newline).
+
+StringToSign = HTTPVerb + "\n" +
+ValueOfHostHeaderInLowercase + "\n" +
+HTTPRequestURI + "\n" +         
+CanonicalizedQueryString <from the preceding step> 
+The HTTPRequestURI component is the HTTP absolute path component of the URI up to but not including the query string. If the HTTPRequestURI is empty, use a forward slash ( / ).
+
+Calculate an RFC 2104-compliant HMAC with the string you just created, your secret access key as the key, and SHA256 or SHA1 as the hash algorithm.
+
+For more information, see http://www.ietf.org/rfc/rfc2104.txt.
+
+Convert the resulting value to base64.
+
+Use the resulting value as the value of the Signature request parameter.
+
+Important
+The final signature you send in the request must be URL-encoded as specified in RFC 3986 (for more information, see http://www.ietf.org/rfc/rfc3986.txt). If your toolkit URL-encodes your final request, then it handles the required URL-encoding of the signature. If your toolkit doesn't URL-encode the final request, then make sure to URL-encode the signature before you include it in the request. Most importantly, make sure the signature is URL-encoded only once. A common mistake is to URL-encode it manually during signature formation, and then again when the toolkit URL-encodes the entire request.
+Query API Examples
+
+Example ListMetrics API Request
+
+This example uses the Amazon CloudWatch ListMetrics action.
+
+http://monitoring.amazonaws.com/?SignatureVersion=2
+&Action=ListMetrics
+&Version=2010-08-01
+&AWSAccessKeyId=<Your AWS Access Key Id>
+&SignatureVersion=2
+&SignatureMethod=HmacSHA256
+&Timestamp=2010-11-17T05%3A13%3A00.000Z
+The following is the string to sign.
+
+GET\n
+monitoring.amazonaws.com\n
+/\n
+AWSAccessKeyId=<Your AWS Access Key Id>
+&Action=ListMetrics
+&SignatureMethod=HmacSHA256
+&SignatureVersion=2
+&Timestamp=2010-11-17T05%3A13%3A00.000Z
+&Version=2010-08-01
+The following is the signed request.
+
+http://monitoring.amazonaws.com/?Action=ListMetrics
+&SignatureVersion=2
+&SignatureMethod=HmacSHA256
+&Timestamp=2010-11-17T05%3A13%3A00.000Z
+&Signature=<URLEncode(Base64Encode(Signature))>
+&Version=2010-08-01
+&AWSAccessKeyId=<Your AWS Access Key Id>
+
+Example ListMetrics API Request Using NextToken Value
+
+This example uses the Amazon CloudWatch ListMetrics action and the NextToken value to retrieve more than 500 metrics.
+
+Create the string to sign according to the following pseudo-grammar (the "\n" represents an ASCII newline).
+
+StringToSign = HTTPVerb + "\n" +
+ValueOfHostHeaderInLowercase + "\n" +
+HTTPRequestURI + "\n" +         
+CanonicalizedQueryString <from the preceding step> 
+The HTTPRequestURI component is the HTTP absolute path component of the URI up to but not including the query string. If the HTTPRequestURI is empty, use a forward slash ( / ).
+
+Prepare a string to sign, as in the following example:
+
+GET\n
+monitoring.amazonaws.com\n
+/\n
+AWSAccessKeyId=<Your AWS Access Key Id>
+&Action=ListMetrics
+&SignatureMethod=HmacSHA256
+&SignatureVersion=2
+&Timestamp=2010-11-17T05%3A13%3A00.000Z
+&Version=2010-08-01
+The following are specified in the example:
+
+Action specifies the action to take (e.g., ListMetrics).
+
+AWSAccessKeyId specifies the AccessKeyId for your AWS account (replace <Your AWS Access Key ID> with your actual AWSAccessKeyId).
+
+SignatureVersion specifies the version of the signature (e.g., 2).
+
+Timestamp2012-09-27T17:06:23.000Z specifies the time stamp of the request (e.g., 09/27/2012, 17:06:23 ).
+
+Version2010-08-01 specifies the version of the ListMetrics API (e.g., last released on 2010-08-01).
+
+Sign the request URL with the string from the previous step. The following example shows the signed request URL.
+
+http://monitoring.amazonaws.com?SignatureVersion=2
+&Action=ListMetrics
+&Version=2010-08-01
+&Timestamp=2012-09-27T17%3A14%3A01.000Z
+&AWSAccessKeyId=<Your AWS Access Key ID>
+&Signature=iE68300Pbl%2BDsKM5mFiOhHWEXAMPLE
+The following are specified in the example:
+
+Action specifies the action to take (e.g., ListMetrics).
+
+Version2010-08-01 specifies the version of the ListMetrics API (e.g., last released on 2010-08-01).
+
+Timestamp2012-09-27T17:06:23.000Z specifies the time stamp of the request (e.g., 09/27/2012, 17:06:23 ).
+
+AWSAccessKeyId specifies the AccessKeyId for your AWS account (replace <Your AWS Access Key ID> with your actual AWSAccessKeyId).
+
+Signature specifies the signature for signing the request (e.g., <URLEncode(Base64Encode(Signature))>=iE68300Pbl%2BDsKM5mFiOhHWEXAMPLE).
+
+Copy the signed request URL to your web browser and press Enter to run the request. You should get results similar to the following:
+
+<ListMetricsResponse>
+    <ListMetricsResult>
+        <Metrics>
+            <member>
+                <Dimensions>
+                    <member>
+                        <Name>InstanceId</Name>
+                        <Value>i-8dea01f0</Value>
+                    </member>
+                </Dimensions>
+                <MetricName>CPUUtilization</MetricName>
+                <Namespace>AWS/EC2<Namespace>
+            </member>
+            <member>
+                <Dimensions>
+                    <member>
+                        <Name>InstanceId</Name>
+                        <Value>i-7dee09t3</Value>
+                    </member>
+                </Dimensions>
+                <MetricName>CPUUtilization</MetricName>
+                <Namespace>AWS/EC2<Namespace>
+            <member>
+            </member>
+        </Metrics>
+        <NextToken>NNNTTT</NextToken>
+    </ListMetricsResult>
+    <ResponseMetadata>
+        <RequestId>8f95da07-08c8-11e2-9cdd-4d93ea583888</RequestId>
+    </ResponseMetadata>
+</ListMetricsResponse>
+From the output in Step 4, save the NextToken value. In this example it is NNNTTT, but it is normally a very long string.
+
+Prepare the string to sign and include the NextTokenNNNTTT value.
+
+Sign the request URL with the string from Step 6. The following example is the signed request URL. It is similar to the signed request URL in Step 3, except that it has the NextTokenNNNTTT value.
+
+http://monitoring.amazonaws.com?SignatureVersion=2
+&Action=ListMetrics
+&Version=2010-08-01
+&NextToken=NNNTTT
+&Timestamp=2012-09-27T17%3A45%3A14.000Z
+&AWSAccessKeyId=<Your AWS Access Key ID>
+&Signature=iE68300Pbl%2BDsKM5mFiOhHWEXAMPLE
+To get the next 500 metrics, copy the signed request URL to your web browser, and press Enter. You can repeat the request with the same parameters and the new NextToken until you have retrieved all of the metrics.
+
+
+Query API Error Messages
+
+Example Error Message When Using the Wrong AWS Secret Access Key to Calculate the Signature
+
+<ErrorResponse>
+    <Error>
+        <Type>Sender</Type>
+        <Code>SignatureDoesNotMatch</Code>
+        <Message>
+          The request signature we calculated does not match the signature you
+        	provided. Check your AWS Secret Access Key and signing method. Consult the service
+        	documentation for details.
+        </Message>
+    </Error>
+    <RequestId>a9c1a06e-0d80-11e2-ac80-9646d110ca61<RequestId>
+</ErrorResponse>
+
+Example Error Message When Using the Wrong AWS AccessKeyID
+
+<ErrorResponse>
+    <Error>
+        <Type>Sender</Type>
+        <Code>InvalidClientTokenId</Code>
+        <Message>
+            The security token included in the request is invalid
+        </Message>
+    </Error>
+    <RequestId>5134a3b8-0d82-11e2-9b0a-db3eb46b3dbd</RequestId>
+</ErrorResponse>
+
+Example Error Message When Providing Incorrect Parameters
+
+The following example shows how to make a request with the MetricName parameter "TestMetric".
+
+The signed URL looks like this:
+
+http://monitoring.amazonaws.com?SignatureVersion=2
+&Action=ListMetrics
+&Version=2010-08-01
+&MetricName=TestMetric
+&Timestamp=2012-09-27T17%3A14%3A01.000Z
+&AWSAccessKeyId=<Your AWS Access Key ID>
+&Signature=iE68300Pbl%2BDsKM5mFiOhHWEXAMPLE
+					
+When you try to retrieve more metrics with the NextToken, you have to provide the same parameters as in the previous request. If you provide the wrong parameters, provide more parameters, or provide fewer parameters (assume that the NextToken is correct), you will get the following error:
+
+<ErrorResponse>
+    <Error>
+        <Type>Sender</Type>
+        <Code>InvalidParameterValue</Code>
+        <Message>Invalid nextToken</Message>
+    </Error>
+    <RequestId>cb1c4191-0e5d-11e2-9c15-6f306828daaa<RequestId>
+</ErrorResponse>
