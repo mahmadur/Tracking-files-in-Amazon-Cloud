@@ -1,0 +1,10 @@
+
+1.Using of cloudWatch through AWS mangement console.
+
+Signing in to the Console
+
+Sign in to the AWS Management Console and open the Amazon CloudWatch console at
+https://console.aws.amazon.com/cloudwatch/.
+
+The monitoring dashboard opens. The dashboard might look something like the following:
+
