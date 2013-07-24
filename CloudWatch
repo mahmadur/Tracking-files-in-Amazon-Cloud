@@ -1,4 +1,3 @@
-
 1.Using of cloudWatch through AWS mangement console.
 
 Signing in to the Console
@@ -6,5 +5,250 @@ Signing in to the Console
 Sign in to the AWS Management Console and open the Amazon CloudWatch console at
 https://console.aws.amazon.com/cloudwatch/.
 
-The monitoring dashboard opens. The dashboard might look something like the following:
+The monitoring dashboard opens. 
+
+
+2 Using of Cloud Watch through Command Line Interface (CLI) Tools
+
+Step 1: Download the CLI
+
+The CLI is written in Java and includes shell scripts for both Windows and Linux/UNIX/Mac OSX.
+
+To install the Amazon CloudWatch CLI
+
+Download the CLI from Amazon CloudWatch Tools.
+
+Save and unpack the Amazon CloudWatch archive to a convenient location on your workstation.
+
+Step 2: Set the JAVA_HOME Environment Variable
+
+The Amazon CloudWatch CLI reads an environment variable (JAVA_HOME) on your computer to locate the Java runtime. The CLI requires Java version 5 or later to run. Either a JRE or JDK installation is acceptable.
+
+To set the JAVA_HOME Environment Variable
+
+At a command prompt, enter the command java -version to determine the version of Java installed on your workstation.
+
+If you do not have version 1.5 or newer, download and install a newer version from http://www.java.com.
+
+Set JAVA_HOME environment variable to point to your Java installation. For example, if your Java executable is in the /usr/jdk/bin directory, set JAVA_HOME to /usr/jdk. If your Java executable is in C:\jdk\bin, set JAVA_HOME to C:\jdk.
+
+Note
+If you are using Cygwin, you must use Linux/UNIX paths (e.g., /usr/bin instead of C:\usr\bin) for AWS_CLOUDWATCH_HOME and AWS_CREDENTIAL_FILE. However, JAVA_HOME should have a Windows path. Additionally, the value cannot contain any spaces, even if the value is quoted or the spaces are escaped.
+The following Linux/UNIX example shows how to set the JAVA_HOME for a Java executable in the /usr/local/jre/bin directory.
+
+$ export JAVA_HOME=/usr/local/jre
+The following Windows example shows how to use the set and setx commands to set JAVA_HOME for a Java executable in the C:\java\jdk1.6.0_6\bin directory. The set command defines JAVA_HOME for the current session and setx makes the change permanent.
+
+C:\> set JAVA_HOME=C:\java\jdk1.6.0_6
+C:\> setx JAVA_HOME C:\java\jdk1.6.0_6
+Note
+Don't include the bin directory in JAVA_HOME; the CLI won't work if you do.
+Add your Java directory to your path before other versions of Java.
+
+On Linux and UNIX, you can update your PATH as follows:
+
+$ export PATH=$JAVA_HOME/bin:$PATH 
+Note
+The export command applies only to the current shell session. To permanently create or update an environment variable, include the command in a start-up script. For example, if you use Bash shell, you can include commands in your ~/.bashrc or /etc/profile file.
+On Windows, you can update your PATH as follows. The set command makes the change temporary. To make the change permanent, use the setx command:
+
+C:\> set PATH=%JAVA_HOME%\bin;%PATH% 
+C:\> setx PATH %JAVA_HOME%\bin;%PATH% 
+Note
+The setx command does not use the "=" sign.
+Verify your JAVA_HOME setting with the command $JAVA_HOME/bin/java -version.
+
+$ $JAVA_HOME/bin/java -version
+java version "1.6.0_33"
+Java(TM) SE Runtime Environment (build 1.6.0_33-b03)
+Java HotSpot(TM) Client VM (build 20.8-b03, mixed mode, sharing)
+The syntax is different on Windows, but the output is similar.
+
+C:\> %JAVA_HOME%\bin\java -version
+java version "1.6.0_33"
+Java(TM) SE Runtime Environment (build 1.6.0_33-b03)
+Java HotSpot(TM) Client VM (build 20.8-b03, mixed mode, sharing)
+Step 3: Set the AWS_CLOUDWATCH_HOME Environment Variable
+
+The CLI depends on an environment variable (AWS_CLOUDWATCH_HOME) to locate supporting libraries. You'll need to set this environment variable before you can use the tool.
+
+To set the AWS_CLOUDWATCH_HOME Environment Variable
+
+Set AWS_CLOUDWATCH_HOME to the path of the directory into which you unzipped the CLI. This directory is named CloudWatch-w.x.y.z (w, x, y, and z are version/release numbers) and contains sub-directories named bin and lib.
+
+The following Linux/UNIX example sets AWS_CLOUDWATCH_HOME for a directory named CloudWatch-1.0.12.0 in the /usr/local directory.
+
+$ export AWS_CLOUDWATCH_HOME=/usr/local/CloudWatch-1.0.12.0  
+The following Windows example sets AWS_CLOUDWATCH_HOME for a directory named CloudWatch-1.0.12.0 in the C:\CLIs directory.
+
+C:\> set AWS_CLOUDWATCH_HOME=C:\CLIs\CloudWatch-1.0.12.0 
+C:\> setx AWS_CLOUDWATCH_HOME C:\CLIs\CloudWatch-1.0.12.0             
+Add the tool's bin directory to your system PATH. The rest of this guide assumes that you've done this.
+
+On Linux and UNIX, you can update your PATH as follows:
+
+$ export PATH=$PATH:$AWS_CLOUDWATCH_HOME/bin 
+On Windows the syntax is slightly different:
+
+C:\> set PATH=%PATH%;%AWS_CLOUDWATCH_HOME%\bin 
+C:\> setx PATH %PATH%;%AWS_CLOUDWATCH_HOME%\bin 
+Step 4: Set the AWS_CREDENTIAL_FILE Environment Variable
+
+You must also provide your AWS credentials to the CLI. The CLI reads your credentials from a credential file that you create on your local system.
+
+You can either specify your credentials with the --aws-credential-file parameter every time you issue a command or you can create an environment variable that points to the credential file on your local system. If the environment variable is properly configured, you can omit the --aws-credential-file parameter when you issue a command. The following procedure describes how to create a credential file and a corresponding AWS_CREDENTIAL_FILE environment variable.
+
+To set up security credentials for your CLI
+
+Log in to the AWS security credentials web site.
+
+Retrieve an access key and its corresponding secret key.
+
+Scroll down to the Access Credentials section and select the Access Keys tab.
+
+Locate an active Access Key in the Your Access Keys list.
+
+To display the Secret Access Key, click Show in the Secret Access Key column.
+
+Write down the keys or save them.
+
+If no Access Keys appear in the list, click Create a New Access Key and follow the on-screen prompts.
+
+Add your access key ID and secret access key to the file named credential-file-path.template:
+
+Open the file credential-file-path.template included in your CLI archive.
+
+Copy and paste your access key ID and secret access key into the file.
+
+Rename the file and save it to a convenient location on your computer.
+
+If you are using Linux, set the file permissions as follows:
+
+$ chmod 600 credential-file-name
+Note
+On Windows you don't need to change the file permissions.
+Set the AWS_CREDENTIAL_FILE environment variable to the fully qualified path of the file you just created.
+
+The following Linux/UNIX example sets AWS_CREDENTIAL_FILE for myCredentialFile in the /usr/local directory.
+
+$ export AWS_CREDENTIAL_FILE=/usr/local/myCredentialFile  
+The following Windows example sets AWS_CREDENTIAL_FILE for myCredentialFile.txt in the C:\aws directory.
+
+C:\> set AWS_CREDENTIAL_FILE=C:\aws\myCredentialFile.txt 
+C:\> setx AWS_CREDENTIAL_FILE C:\aws\myCredentialFile.txt 
+Step 5: Set the Region
+
+By default, the Amazon CloudWatch tools use the US East (Northern Virginia) Region (us-east-1) with the monitoring.us-east-1.amazonaws.com service endpoint URL. If your instances are in a different region, you must specify the region where your instances reside. For example, if your instances are in Europe, you must specify the EU (Ireland) Region by using the --region eu-west-1 parameter or by setting the AWS_CLOUDWATCH_URL environment variable.
+
+This section describes how to specify a different Region by changing the service endpoint URL.
+
+To specify a different Region
+
+To view available Regions see Regions and Endpoints in the Amazon Web Services General Reference.
+
+If you want to change the service endpoint, set the AWS_CLOUDWATCH_URL environment variable.
+
+The following Linux/UNIX example sets AWS_CLOUDWATCH_URL to the EU (Ireland) Region.
+
+$ export AWS_CLOUDWATCH_URL=https://monitoring.eu-west-1.amazonaws.com  
+The following Windows example sets AWS_CLOUDWATCH_URL to the EU (Ireland) Region.
+
+C:\> set AWS_CLOUDWATCH_URL=https://monitoring.eu-west-1.amazonaws.com  
+C:\> setx AWS_CLOUDWATCH_URL https://monitoring.eu-west-1.amazonaws.com  
+Step 6: Test Your Configuration
+
+After you have installed and configured the Amazon CloudWatch CLI, you should test your configuration.
+
+To test your installation and configuration of Amazon CloudWatch
+
+On your workstation, open a new command prompt.
+
+Type the command mon-cmd.
+
+You should see output similar to the following:
+
+Command Name                       Description                                            
+------------                       -----------               
+mon-delete-alarms                  Delete alarms.      
+mon-describe-alarm-history         Describe alarm history.  
+mon-describe-alarms                Describe alarms fully. 
+mon-describe-alarms-for-metric     Describe all alarms ... a single metric.
+mon-disable-alarm-actions          Disable all actions for a given alarm.
+mon-enable-alarm-actions           Enable all actions for a given alarm.
+mon-get-stats                      Get metric statistics.        
+mon-list-metrics                   List user's metrics.      
+mon-put-data                       Put metric data. 
+mon-put-metric-alarm               Create new alarm or update existing one.
+mon-set-alarm-state                Manually set the state of an alarm.
+mon-version                        Prints the version ... tool and the API. 
+
+For help on a specific command, type '<commandname> --help'
+This completes your installation and configuration of the Amazon CloudWatch CLI.
+
+CLI Example
+
+This section shows some examples of CLI usage.
+
+Note
+This section uses CLI for Amazon CloudWatch and Amazon EC2. For more information about the Amazon EC2 CLI, see Getting Started with the Command Line Tools in the Amazon Elastic Compute Cloud User Guide.
+Use the EC2 ec2-run-instances command as in the following example.
+
+PROMPT>ec2-run-instances ami-60a54009 -n 3 --availability-zone us-east-1a
+Note
+If you wanted to automatically monitor all of the EC2 Instances spun up by the preceding command, you would add --monitoring. This lets you skip step 2 in this procedure.
+The command returns a unique identifier for each launched instance. You use the instance ID to manipulate the instance. This includes viewing the status of the instance, terminating the instance, and so on. Launching the instance takes a few minutes.
+
+RESERVATION r-237fed4a 853279305796 default
+INSTANCE i-d9add0b0 ami-60a54009 pending 0 m1.small 2009-05-14T12:38:24+0000 us-east-1a aki-a71cf9ce ari-a51cf9cc monitoring-disabled
+Use the mon-list-metrics command to get a list of what metrics are being stored for your AWS account. For example:
+
+PROMPT>mon-list-metrics
+The mon-list-metrics outputs a table containing the Metric name, Namespace, and Dimension associated with each metric. For example:
+
+CPUUtilization       AWS/EC2  {InstanceId=i-c385b3aa}
+CPUUtilization       AWS/EC2  {ImageId=ami-11ca2d78}
+CPUUtilization       AWS/EC2  {InstanceType=m1.small}
+CPUUtilization       AWS/EC2
+DiskReadBytes        AWS/EC2  {ImageId=ami-11ca2d78}
+DiskReadBytes        AWS/EC2  {InstanceType=m1.small}
+DiskReadBytes        AWS/EC2
+DiskReadBytes        AWS/EC2  {InstanceId=i-c385b3aa}
+DiskReadOps          AWS/EC2  {InstanceId=i-c385b3aa}
+DiskReadOps          AWS/EC2  {InstanceType=m1.small}
+DiskReadOps          AWS/EC2
+DiskReadOps          AWS/EC2  {ImageId=ami-11ca2d78}
+DiskWriteBytes       AWS/EC2  {InstanceId=i-c385b3aa}
+DiskWriteBytes       AWS/EC2  {InstanceType=m1.small}
+DiskWriteBytes       AWS/EC2  {ImageId=ami-11ca2d78}
+DiskWriteBytes       AWS/EC2
+DiskWriteOps         AWS/EC2  {InstanceId=i-c385b3aa}
+DiskWriteOps         AWS/EC2  {ImageId=ami-11ca2d78}
+DiskWriteOps         AWS/EC2  {InstanceType=m1.small}
+DiskWriteOps         AWS/EC2
+NetworkIn            AWS/EC2
+NetworkIn            AWS/EC2  {InstanceId=i-c385b3aa}
+NetworkIn            AWS/EC2  {ImageId=ami-11ca2d78}
+NetworkIn            AWS/EC2  {InstanceType=m1.small}
+NetworkOut           AWS/EC2  {InstanceType=m1.small}
+NetworkOut           AWS/EC2
+NetworkOut           AWS/EC2  {ImageId=ami-11ca2d78}
+NetworkOut           AWS/EC2  {InstanceId=i-c385b3aa}
+  			
+Use the EC2 ec2-monitor-instances command as in the following example.
+
+PROMPT> ec2-monitor-instances i-43a4412a
+ec2-monitor-instances returns a table that contains the selected instance IDs and the current monitoring state.
+
+i-43a4412a monitoring-pending
+Use the Amazon CloudWatch mon-get-stats command as in the following example.
+
+PROMPT> mon-get-stats CPUUtilization --start-time 2009-05-15T00:00:00 --end-time 2009-05-16T00:00:00 --period 60 --statistics "Average" 
+--namespace "AWS/EC2" --dimensions "ImageId=ami-60a54009"
+Amazon CloudWatch returns a response similar to the following (the data has been truncated for brevity):
+
+2009-05-15 	22:42:00   	0.38   Percent
+2009-05-15 	22:48:00   	0.39   Percent
+2009-05-15 	22:54:00   	0.38   Percent
+Note
+Amazon CloudWatch returns the data for this function in the following order: date, time, sample, CPUUtilization, and unit
 
